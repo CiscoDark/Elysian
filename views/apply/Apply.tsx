@@ -62,7 +62,7 @@ const Apply: React.FC<ApplyProps> = ({ setActiveView }) => {
     useEffect(() => {
         if (isSubmitted) {
             const timer = setTimeout(() => {
-                setActiveView('home');
+                setActiveView('models');
             }, 3000); // Redirect after 3 seconds
 
             return () => clearTimeout(timer); // Cleanup on unmount

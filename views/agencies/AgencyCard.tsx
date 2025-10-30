@@ -14,13 +14,6 @@ const AgencyCard: React.FC<AgencyCardProps> = ({ agency }) => {
             <p className="text-brand-text text-sm">{agency.location}</p>
             <span className='my-3 inline-block px-3 py-1 text-xs font-semibold rounded-full border border-gray-500 text-gray-300'>{agency.type} Agency</span>
             <p className="text-gray-400 text-sm mt-2">{agency.specialization}</p>
-            <button
-                className="mt-4 bg-brand-highlight text-black text-sm font-semibold py-2 px-4 rounded-full hover:bg-gray-200 transition duration-300"
-                onClick={() => playSound('click')}
-                onMouseEnter={() => playSound('hover')}
-            >
-                View Profile
-            </button>
         </div>
     );
 };
