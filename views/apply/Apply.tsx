@@ -85,17 +85,49 @@ const Apply: React.FC<ApplyProps> = ({ setActiveView }) => {
                 </svg>
             </button>
             <h2 className="text-3xl font-bold text-white mb-4">Application Terms & Conditions</h2>
-            <div className="h-64 overflow-y-auto bg-brand-primary p-4 rounded border border-brand-accent text-sm text-gray-300 mb-6">
-                <p className="mb-2">Please read these terms and conditions carefully before submitting your application.</p>
-                <p className="mb-4">By submitting your application to Elysian Talent Hub ("we", "us", "our"), you ("the applicant") agree to the following terms:</p>
-                <ol className="list-decimal list-inside space-y-2">
-                    <li>You confirm that you are 18 years of age or older. If you are under 18, you must have consent from a parent or legal guardian.</li>
-                    <li>You certify that all information provided in your application is true, accurate, current, and complete.</li>
-                    <li>You grant us a non-exclusive, worldwide, royalty-free license to use, reproduce, distribute, and display the photographs and information submitted for the purpose of evaluation and potential representation.</li>
-                    <li>There is no guarantee of representation or employment. Our team will review your submission, and we will contact you only if we are interested in moving forward.</li>
-                    <li>You agree that we are not responsible for any costs incurred during the application process.</li>
-                    <li>You understand that our recruitment process does not require any payment from applicants. Beware of scams. Elysian will never ask for money for an application.</li>
-                </ol>
+            <div className="h-96 overflow-y-auto bg-brand-primary p-4 rounded border border-brand-accent text-sm text-gray-300 mb-6 space-y-4">
+                <p className="font-bold text-white">IMPORTANT: Please read these Terms and Conditions ("T&amp;C") carefully before submitting your application. By clicking "I Agree" and submitting an application through this website, you agree to be bound by these T&amp;C.</p>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">1. Introduction and Scope</h3>
+                    <p>These T&amp;C govern your use of this website and the process of submitting an application for professional representation to one of our two divisions ("Application"). Submitting an Application does not create a formal Agency/Artist Representation Agreement, nor does it guarantee an interview or eventual representation. A formal, exclusive relationship is only established upon the execution of a separate Representation Agreement signed by both parties. The terms applicable to your Application are determined by the division you select: Acting Division (LightStorm Entertainment Ltd., US-based) or Music Division (Independent Talent Group Ltd., UK-based).</p>
+                </div>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">2. Applicant Obligations and Status</h3>
+                    <p>By submitting an Application, you represent and warrant that you are legally eligible to enter into a professional representation agreement. You must provide true, accurate, current, and complete information as required by the Application form; misrepresentation will result in immediate rejection. You agree to cooperate with the Agency's review process, including promptly responding to communications. You acknowledge that your Application is for consideration as an Independent Contractor and not an employee of either Agency.</p>
+                </div>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">3. Financial Obligations (Processing Fee)</h3>
+                    <p>You acknowledge and agree that a one-time processing fee will be required only upon the successful signing of a formal Representation Agreement. This fee covers initial administrative and establishment costs and is non-refundable under all circumstances, including the subsequent termination of the Representation Agreement.</p>
+                    <ul className="list-disc list-inside pl-4 mt-2 space-y-1">
+                        <li>If you are applying to the Acting Division (LightStorm Entertainment Ltd.), the non-refundable processing fee is $1,000.00 (One Thousand US Dollars).</li>
+                        <li>If you are applying to the Music Division (Independent Talent Group Ltd.), the non-refundable processing fee is $1,500.00 (One Thousand Five Hundred US Dollars).</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">4. Application Material and Use of Likeness</h3>
+                    <p>You retain all ownership rights to your submitted materials, including photographs, video reels, music tracks, and resumes ("Application Materials"). By submitting them, you grant the respective Agency division a non-exclusive, royalty-free, worldwide license to use, reproduce, and display these materials solely for the purpose of evaluating your potential for representation and internal team review. You will receive no compensation or payment for the Agency's review or internal use of these materials. The Agency is under no obligation to return Application Materials.</p>
+                </div>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">5. Governing Law and Jurisdiction</h3>
+                    <p>You acknowledge that the potential formal Representation Agreement, and all matters related to your application, will be governed by the laws and jurisdiction of the relevant division:</p>
+                    <ul className="list-disc list-inside pl-4 mt-2 space-y-1">
+                        <li>For the Acting Division (LightStorm Entertainment Ltd.): The governing law is the United States, and the primary jurisdiction and seat of arbitration shall be Santa Monica, California, U.S.</li>
+                        <li>For the Music Division (Independent Talent Group Ltd.): The governing law is the United Kingdom, and the primary jurisdiction and seat of arbitration shall be London, U.K.</li>
+                    </ul>
+                    <p className="mt-2">Any dispute related to the application process will first be attempted through good-faith negotiation. If negotiation fails, the Parties agree to engage in Mediation before resorting to Litigation or Arbitration, as specified in the formal contract for the relevant division.</p>
+                </div>
+
+                <div>
+                    <h3 className="font-semibold text-white mb-2">6. General Provisions</h3>
+                    <p>Both parties agree to keep confidential any non-public information disclosed during the application process. These T&amp;C constitute the entire agreement regarding the Application process and supersede all prior communications regarding your submission. The Agency reserves the right to amend these T&amp;C at any time, and your continued use of the website after an amendment constitutes your acceptance of the revised T&amp;C.</p>
+                </div>
+
+                <p className="font-bold text-white">By proceeding with your online application, you acknowledge that you have read, understood, and agree to be bound by these Application Terms and Conditions and the specific jurisdictional terms of the division to which you are applying.</p>
             </div>
             <div className="flex items-center space-x-3 mb-6">
                 <input
