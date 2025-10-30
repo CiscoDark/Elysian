@@ -64,6 +64,7 @@ const TOUR_CONFIG = [
 
 const Tutorial: React.FC<TutorialProps> = ({ stepIndex, nextStep, prevStep, endTour }) => {
   const [targetRect, setTargetRect] = useState<Rect | null>(null);
+  const [isMobile, setIsMobile] = useState(document.documentElement.clientWidth < 768);
 
   const currentStep = TOUR_CONFIG[stepIndex];
 
@@ -79,17 +80,22 @@ const Tutorial: React.FC<TutorialProps> = ({ stepIndex, nextStep, prevStep, endT
             setTargetRect(element.getBoundingClientRect());
         } else if(currentStep.position === 'center') {
             setTargetRect({
-                top: window.innerHeight / 2,
-                left: window.innerWidth / 2,
+                top: document.documentElement.clientHeight / 2,
+                left: document.documentElement.clientWidth / 2,
                 width: 0,
                 height: 0,
             });
         }
     };
+
+    const handleResize = () => {
+        setIsMobile(document.documentElement.clientWidth < 768);
+        updatePosition();
+    };
     
     updatePosition();
-    window.addEventListener('resize', updatePosition);
-    return () => window.removeEventListener('resize', updatePosition);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [stepIndex, currentStep, endTour]);
 
   if (!targetRect || !currentStep) {
@@ -97,35 +103,69 @@ const Tutorial: React.FC<TutorialProps> = ({ stepIndex, nextStep, prevStep, endT
   }
   
   const tooltipStyle: React.CSSProperties = {};
+  
+  // Desktop popover positioning logic
+  const POPOVER_WIDTH = 320; // w-80 is 20rem = 320px
+  const POPOVER_MARGIN = 15;
+  const VIEWPORT_PADDING = 16;
+  const clientWidth = document.documentElement.clientWidth;
+  const clientHeight = document.documentElement.clientHeight;
+
   if (currentStep.position === 'center') {
-    tooltipStyle.top = '50%';
-    tooltipStyle.left = '50%';
-    tooltipStyle.transform = 'translate(-50%, -50%)';
-  } else if (currentStep.position === 'bottom') {
-    tooltipStyle.top = `${targetRect.bottom + 15}px`;
-    tooltipStyle.left = `${targetRect.left + targetRect.width / 2}px`;
-    tooltipStyle.transform = 'translateX(-50%)';
-  } else if (currentStep.position === 'bottom-right') {
-     tooltipStyle.top = `${targetRect.bottom + 15}px`;
-    tooltipStyle.left = `${targetRect.right}px`;
-    tooltipStyle.transform = 'translateX(-100%)';
+      tooltipStyle.top = '50%';
+      tooltipStyle.left = '50%';
+      tooltipStyle.transform = 'translate(-50%, -50%)';
+  } else {
+      let leftPos = 0;
+      let transform = '';
+
+      tooltipStyle.top = `${targetRect.bottom + POPOVER_MARGIN}px`;
+      
+      if (currentStep.position === 'bottom') {
+          leftPos = targetRect.left + targetRect.width / 2;
+          transform = 'translateX(-50%)';
+      } else if (currentStep.position === 'bottom-right') {
+          leftPos = targetRect.right;
+          transform = 'translateX(-100%)';
+      }
+
+      // Resolve initial position to get the true left edge
+      let finalLeft = leftPos;
+      if (transform === 'translateX(-50%)') {
+          finalLeft -= POPOVER_WIDTH / 2;
+      } else if (transform === 'translateX(-100%)') {
+          finalLeft -= POPOVER_WIDTH;
+      }
+
+      // Adjust for viewport boundaries
+      if (finalLeft < VIEWPORT_PADDING) {
+          tooltipStyle.left = `${VIEWPORT_PADDING}px`;
+          tooltipStyle.transform = 'translateX(0)';
+      } else if (finalLeft + POPOVER_WIDTH > clientWidth - VIEWPORT_PADDING) {
+          tooltipStyle.left = `${clientWidth - VIEWPORT_PADDING}px`;
+          tooltipStyle.transform = 'translateX(-100%)';
+      } else {
+          tooltipStyle.left = `${leftPos}px`;
+          tooltipStyle.transform = transform;
+      }
   }
 
   const isLastStep = stepIndex === TOUR_CONFIG.length - 1;
+  const useMobileLayout = isMobile && currentStep.position !== 'center';
 
   return (
     <div className="fixed inset-0 z-[100]" aria-live="polite">
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         style={{
-            clipPath: targetRect.width > 0 ? `path(evenodd, 'M0 0 H ${window.innerWidth} V ${window.innerHeight} H 0 Z M ${targetRect.left - 5} ${targetRect.top - 5} H ${targetRect.right + 5} V ${targetRect.bottom + 5} H ${targetRect.left - 5} Z')` : '',
+            clipPath: !useMobileLayout && targetRect.width > 0 ? `path(evenodd, 'M0 0 H ${clientWidth} V ${clientHeight} H 0 Z M ${targetRect.left - 5} ${targetRect.top - 5} H ${targetRect.right + 5} V ${targetRect.bottom + 5} H ${targetRect.left - 5} Z')` : 'none',
             transition: 'clip-path 0.4s ease-in-out'
         }}
       ></div>
       
       <div 
-        className="absolute bg-brand-secondary rounded-lg shadow-2xl p-6 w-80 text-white animate-fade-in"
-        style={{...tooltipStyle, transition: 'top 0.4s ease-in-out, left 0.4s ease-in-out' }}
+        className={`bg-brand-secondary rounded-lg shadow-2xl p-6 text-white animate-fade-in max-h-[80vh] overflow-y-auto ${useMobileLayout ? 'fixed bottom-4 left-4 right-4' : 'absolute w-80'}`}
+        style={useMobileLayout ? {} : {...tooltipStyle, transition: 'top 0.4s ease-in-out, left 0.4s ease-in-out' }}
       >
         <h3 className="font-bold text-lg mb-2">{currentStep.title}</h3>
         <p className="text-sm text-brand-text mb-4">{currentStep.content}</p>
