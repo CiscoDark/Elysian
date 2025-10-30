@@ -25,14 +25,7 @@ const MusicVideoCastingCard: React.FC<MusicVideoCastingCardProps> = ({ call }) =
                 </div>
             </div>
             <div className="flex-shrink-0 mt-4 md:mt-0 text-center md:text-right">
-                <p className="text-sm text-gray-400 mb-2">Shoot Date: {call.shootDate}</p>
-                <button
-                    className="bg-brand-highlight text-black font-semibold py-2 px-6 rounded-full hover:bg-gray-200 transition duration-300"
-                    onClick={() => playSound('click')}
-                    onMouseEnter={() => playSound('hover')}
-                >
-                    Submit
-                </button>
+                <p className="text-sm text-gray-400">Shoot Date: {call.shootDate}</p>
             </div>
         </div>
     );

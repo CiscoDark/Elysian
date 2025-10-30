@@ -4,9 +4,10 @@ import { playSound } from '../../utils/sound';
 
 interface MusicPromotionCardProps {
     promo: MusicPromotion;
+    onLearnMore: () => void;
 }
 
-const MusicPromotionCard: React.FC<MusicPromotionCardProps> = ({ promo }) => {
+const MusicPromotionCard: React.FC<MusicPromotionCardProps> = ({ promo, onLearnMore }) => {
     return (
         <div className="bg-brand-secondary rounded-lg overflow-hidden shadow-lg group transform hover:-translate-y-2 transition-transform duration-300 liquid-glass-hover" onMouseEnter={() => playSound('hover')}>
             <div className="relative h-56">
@@ -25,7 +26,10 @@ const MusicPromotionCard: React.FC<MusicPromotionCardProps> = ({ promo }) => {
                 </div>
                 <button
                     className="w-full bg-brand-accent text-white font-bold py-2 px-4 rounded-full hover:bg-brand-highlight hover:text-black transition duration-300"
-                    onClick={() => playSound('click')}
+                    onClick={() => {
+                        playSound('click');
+                        onLearnMore();
+                    }}
                     onMouseEnter={() => playSound('hover')}
                 >
                     Learn More
