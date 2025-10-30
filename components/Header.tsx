@@ -50,6 +50,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                   link.children ? (
                     <div key={link.name} className="relative" ref={musicDropdownRef}>
                       <button
+                        data-tour-id="music"
                         onClick={() => {
                           playSound(isMusicDropdownOpen ? 'close' : 'open');
                           setIsMusicDropdownOpen(prev => !prev)
@@ -65,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                         <svg className={`w-4 h-4 transition-transform duration-300 ${isMusicDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                       </button>
                       {isMusicDropdownOpen && (
-                        <div className="absolute left-0 mt-2 w-56 origin-top-left rounded-md shadow-lg bg-brand-secondary ring-1 ring-black ring-opacity-5 z-10">
+                        <div className="absolute left-0 mt-2 w-56 origin-top-left rounded-md shadow-lg bg-brand-secondary ring-1 ring-black ring-opacity-5 z-[101]">
                           <div className="py-1" role="menu" aria-orientation="vertical">
                             {link.children.map(child => (
                               <button
@@ -88,6 +89,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                   ) : (
                     <button
                       key={link.view}
+                      data-tour-id={link.view}
                       onClick={() => {
                         playSound('click');
                         setActiveView(link.view!);

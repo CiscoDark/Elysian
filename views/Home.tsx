@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import type { View } from '../types';
 import FeaturedModelsSlider from './home/FeaturedModelsSlider';
@@ -6,9 +7,10 @@ import { playSound } from '../utils/sound';
 
 interface HomeProps {
   setActiveView: (view: View) => void;
+  startTutorial: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ setActiveView }) => {
+const Home: React.FC<HomeProps> = ({ setActiveView, startTutorial }) => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -87,10 +89,7 @@ const Home: React.FC<HomeProps> = ({ setActiveView }) => {
             </p>
             <div className="mt-10 animate-fade-in-up">
               <button
-                onClick={() => {
-                  playSound('click');
-                  setActiveView('models');
-                }}
+                onClick={startTutorial}
                 onMouseEnter={() => playSound('hover')}
                 className="font-semibold py-4 px-10 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover"
               >

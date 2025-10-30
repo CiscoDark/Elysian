@@ -11,9 +11,34 @@ import Apply from './views/apply/Apply';
 import type { View } from './types';
 import BackToTopButton from './components/BackToTopButton';
 import TagSlider from './views/home/TagSlider';
+import Tutorial from './components/Tutorial';
+import { playSound } from './utils/sound';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<View>('home');
+  const [isTutorialActive, setIsTutorialActive] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  const startTutorial = () => {
+    playSound('open');
+    setTutorialStep(0);
+    setIsTutorialActive(true);
+  };
+
+  const endTutorial = () => {
+    playSound('close');
+    setIsTutorialActive(false);
+  };
+
+  const nextStep = () => {
+    playSound('click', 0.3);
+    setTutorialStep(prev => prev + 1);
+  };
+
+  const prevStep = () => {
+    playSound('click', 0.3);
+    setTutorialStep(prev => prev - 1);
+  };
 
   const renderView = () => {
     switch (activeView) {
@@ -31,7 +56,7 @@ const App: React.FC = () => {
         return <Apply setActiveView={setActiveView} />;
       case 'home':
       default:
-        return <Home setActiveView={setActiveView} />;
+        return <Home setActiveView={setActiveView} startTutorial={startTutorial} />;
     }
   };
 
@@ -43,6 +68,15 @@ const App: React.FC = () => {
         {renderView()}
       </main>
       <BackToTopButton />
+      {isTutorialActive && (
+        <Tutorial
+          stepIndex={tutorialStep}
+          nextStep={nextStep}
+          prevStep={prevStep}
+          endTour={endTutorial}
+          setStep={setTutorialStep}
+        />
+      )}
     </div>
   );
 };
