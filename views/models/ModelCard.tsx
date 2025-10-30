@@ -5,7 +5,8 @@ import OptimizedImage from '../../components/OptimizedImage';
 
 interface ModelCardProps {
   model: Model;
-  wrapperProps?: React.HTMLAttributes<HTMLDivElement>;
+  // FIX: Explicitly allow the 'data-model-id' attribute to be passed, resolving a TypeScript error in the parent component.
+  wrapperProps?: React.HTMLAttributes<HTMLDivElement> & { 'data-model-id'?: number };
 }
 
 const ModelCard: React.FC<ModelCardProps> = ({ model, wrapperProps }) => {

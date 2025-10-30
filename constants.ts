@@ -1,19 +1,18 @@
-
 import type { Model, Agency, CastingCall, View, MusicVideoCastingCall, MusicPromotion } from './types';
 
-export const NAV_LINKS: { name: string; view?: View, children?: { name: string; view: View }[], isPrimary?: boolean }[] = [
-  { name: 'Home', view: 'home' },
-  { name: 'Models', view: 'models' },
-  { name: 'Modeling Agencies', view: 'modelingAgencies' },
-  { name: 'Movie Agencies', view: 'movieAgencies' },
+export const NAV_LINKS: { name: string; view?: View, path?: string; children?: { name: string; view: View, path: string; }[], isPrimary?: boolean }[] = [
+  { name: 'Home', view: 'home', path: '/' },
+  { name: 'Models', view: 'models', path: '/models' },
+  { name: 'Modeling Agencies', view: 'modelingAgencies', path: '/agencies/modeling' },
+  { name: 'Movie Agencies', view: 'movieAgencies', path: '/agencies/movie' },
   { 
     name: 'Music', 
     children: [
-        { name: 'Music Video Casting', view: 'musicVideoCasting' },
-        { name: 'Music Promoting', view: 'musicPromoting' },
+        { name: 'Music Video Casting', view: 'musicVideoCasting', path: '/music/casting' },
+        { name: 'Music Promoting', view: 'musicPromoting', path: '/music/promoting' },
     ]
   },
-  { name: 'Apply', view: 'apply', isPrimary: true },
+  { name: 'Apply', view: 'apply', path: '/apply', isPrimary: true },
 ];
 
 export const MODELS: Model[] = [

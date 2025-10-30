@@ -3,7 +3,7 @@ import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
 
 interface ApplyProps {
-    setActiveView: (view: View) => void;
+    navigateTo: (view: View) => void;
 }
 
 type FormState = {
@@ -32,7 +32,7 @@ const INITIAL_FILE_STATE: FileState = {
     headshot: null, fullBody: null, sideProfile: null
 };
 
-const Apply: React.FC<ApplyProps> = ({ setActiveView }) => {
+const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     const [step, setStep] = useState<'terms' | 'form'>('terms');
     const [agreed, setAgreed] = useState(false);
     const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
@@ -62,19 +62,19 @@ const Apply: React.FC<ApplyProps> = ({ setActiveView }) => {
     useEffect(() => {
         if (isSubmitted) {
             const timer = setTimeout(() => {
-                setActiveView('models');
+                navigateTo('models');
             }, 3000); // Redirect after 3 seconds
 
             return () => clearTimeout(timer); // Cleanup on unmount
         }
-    }, [isSubmitted, setActiveView]);
+    }, [isSubmitted, navigateTo]);
     
     const renderTerms = () => (
         <div className="relative max-w-4xl mx-auto bg-brand-secondary p-8 rounded-lg shadow-xl">
             <button
                 onClick={() => {
                     playSound('close');
-                    setActiveView('home');
+                    navigateTo('home');
                 }}
                 onMouseEnter={() => playSound('hover')}
                 className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10 p-1 rounded-full"
@@ -158,7 +158,7 @@ const Apply: React.FC<ApplyProps> = ({ setActiveView }) => {
             <button
                 onClick={() => {
                     playSound('close');
-                    setActiveView('home');
+                    navigateTo('home');
                 }}
                 onMouseEnter={() => playSound('hover')}
                 className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10 p-1 rounded-full"

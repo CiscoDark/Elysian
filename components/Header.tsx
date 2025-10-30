@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { View } from '../types';
 import { NAV_LINKS } from '../constants';
@@ -6,10 +5,10 @@ import { playSound } from '../utils/sound';
 
 interface HeaderProps {
   activeView: View;
-  setActiveView: (view: View) => void;
+  navigateTo: (view: View) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
+const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMusicDropdownOpen, setIsMusicDropdownOpen] = useState(false);
   const musicDropdownRef = useRef<HTMLDivElement>(null);
@@ -35,14 +34,20 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
     };
   }, []);
 
+  const handleNavClick = (e: React.MouseEvent, view: View) => {
+    e.preventDefault();
+    playSound('click');
+    navigateTo(view);
+  };
+
   return (
     <nav className="bg-black/80 backdrop-blur-sm sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
+            <a href="/" onClick={(e) => handleNavClick(e, 'home')} className="flex-shrink-0">
                <h1 className="text-xl font-black text-white tracking-widest uppercase">Elysian</h1>
-            </div>
+            </a>
           </div>
            <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
@@ -69,31 +74,29 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                         <div className="absolute left-0 mt-2 w-56 origin-top-left rounded-md shadow-lg bg-brand-secondary ring-1 ring-black ring-opacity-5 z-[101]">
                           <div className="py-1" role="menu" aria-orientation="vertical">
                             {link.children.map(child => (
-                              <button
+                              <a
                                 key={child.view}
-                                onClick={() => {
-                                  playSound('click');
-                                  setActiveView(child.view);
+                                href={child.path}
+                                onClick={(e) => {
+                                  handleNavClick(e, child.view);
                                   setIsMusicDropdownOpen(false);
                                 }}
                                 onMouseEnter={() => playSound('hover')}
                                 className={`${navLinkClasses(child.view)} w-full text-left block px-4 py-2 liquid-glass-hover`}
                               >
                                 {child.name}
-                              </button>
+                              </a>
                             ))}
                           </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <button
+                    <a
                       key={link.view}
+                      href={link.path}
                       data-tour-id={link.view}
-                      onClick={() => {
-                        playSound('click');
-                        setActiveView(link.view!);
-                      }}
+                      onClick={(e) => handleNavClick(e, link.view!)}
                       onMouseEnter={() => playSound('hover')}
                       className={
                         link.isPrimary
@@ -102,7 +105,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                       }
                     >
                       {link.name}
-                    </button>
+                    </a>
                   )
                 ))}
               </div>
@@ -141,26 +144,26 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                 <React.Fragment key={link.name}>
                   <span className="block px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">{link.name}</span>
                   {link.children.map(child => (
-                    <button
+                    <a
                       key={child.view}
-                      onClick={() => {
-                          playSound('click');
-                          setActiveView(child.view);
+                      href={child.path}
+                      onClick={(e) => {
+                          handleNavClick(e, child.view);
                           setIsMenuOpen(false);
                       }}
                       onMouseEnter={() => playSound('hover')}
                       className={`${navLinkClasses(child.view)} block w-full text-left pl-6 liquid-glass-hover`}
                     >
                       {child.name}
-                    </button>
+                    </a>
                   ))}
                 </React.Fragment>
               ) : (
-                <button
+                <a
                   key={link.view}
-                  onClick={() => {
-                      playSound('click');
-                      setActiveView(link.view!);
+                  href={link.path}
+                  onClick={(e) => {
+                      handleNavClick(e, link.view!);
                       setIsMenuOpen(false);
                   }}
                   onMouseEnter={() => playSound('hover')}
@@ -171,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                   }
                 >
                   {link.name}
-                </button>
+                </a>
               )
             ))}
           </div>

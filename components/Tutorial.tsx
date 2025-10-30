@@ -10,11 +10,14 @@ interface TutorialProps {
   setStep: (step: number) => void;
 }
 
+// FIX: Added 'right' and 'bottom' properties to the Rect interface to prevent type errors when accessing them.
 interface Rect {
   top: number;
   left: number;
   width: number;
   height: number;
+  right: number;
+  bottom: number;
 }
 
 const TOUR_CONFIG = [
@@ -79,11 +82,16 @@ const Tutorial: React.FC<TutorialProps> = ({ stepIndex, nextStep, prevStep, endT
         if (element) {
             setTargetRect(element.getBoundingClientRect());
         } else if(currentStep.position === 'center') {
+            const top = document.documentElement.clientHeight / 2;
+            const left = document.documentElement.clientWidth / 2;
             setTargetRect({
-                top: document.documentElement.clientHeight / 2,
-                left: document.documentElement.clientWidth / 2,
+                top: top,
+                left: left,
                 width: 0,
                 height: 0,
+                // FIX: Calculated 'right' and 'bottom' for the centered position to match the updated Rect interface.
+                right: left,
+                bottom: top,
             });
         }
     };

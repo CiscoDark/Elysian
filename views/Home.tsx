@@ -5,12 +5,12 @@ import LatestSection from './home/LatestSection';
 import { playSound } from '../utils/sound';
 
 interface HomeProps {
-  setActiveView: (view: View) => void;
+  navigateTo: (view: View) => void;
   startTutorial: () => void;
   onModelClick: (modelId: number) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ setActiveView, startTutorial, onModelClick }) => {
+const Home: React.FC<HomeProps> = ({ navigateTo, startTutorial, onModelClick }) => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -72,7 +72,8 @@ const Home: React.FC<HomeProps> = ({ setActiveView, startTutorial, onModelClick 
               src="https://picsum.photos/seed/hero-model/1200/900" 
               alt="Fashion Model" 
               className="h-full w-full object-cover object-top opacity-40 animate-zoom-in grayscale"
-              fetchpriority="high"
+              // FIX: The HTML attribute 'fetchpriority' should be camelCased to 'fetchPriority' in JSX.
+              fetchPriority="high"
               srcSet="https://picsum.photos/seed/hero-model/800/600 800w, https://picsum.photos/seed/hero-model/1200/900 1200w, https://picsum.photos/seed/hero-model/1600/1200 1600w, https://picsum.photos/seed/hero-model/2000/1500 2000w"
               sizes="100vw"
             />
