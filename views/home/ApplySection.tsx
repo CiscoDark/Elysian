@@ -1,6 +1,7 @@
 import React from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
+import OptimizedImage from '../../components/OptimizedImage';
 
 interface ApplySectionProps {
   setActiveView: (view: View) => void;
@@ -11,11 +12,11 @@ const ApplySection: React.FC<ApplySectionProps> = ({ setActiveView }) => {
     <section 
         className="relative py-20 md:py-32 overflow-hidden" 
     >
-      <img
+      <OptimizedImage
         src="https://picsum.photos/seed/applybg/1920/1080"
         alt="Aspiring talent looking towards the future"
-        loading="lazy"
         className="absolute inset-0 w-full h-full object-cover -z-10"
+        sizes="100vw"
       />
       <div className="absolute inset-0 bg-black/70"></div>
       <div className="relative container mx-auto px-4 text-center z-10">

@@ -1,5 +1,5 @@
-
 import React from 'react';
+import OptimizedImage from '../../components/OptimizedImage';
 
 const LATEST_MEDIA = [
   { src: 'https://picsum.photos/seed/latest1/600/800', type: 'image', color: true, caption: 'Editorial shoot for Vogue' },
@@ -24,11 +24,11 @@ const LatestSection: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {LATEST_MEDIA.map((media, index) => (
           <div key={index} className="group relative overflow-hidden rounded-lg aspect-[3/4] liquid-glass-hover">
-            <img 
-              src={media.src} 
-              alt={media.caption} 
-              className={`h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 ${!media.color ? 'grayscale' : ''}`} 
-              loading="lazy"
+            <OptimizedImage
+              src={media.src}
+              alt={media.caption}
+              className={`h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 ${!media.color ? 'grayscale' : ''}`}
+              sizes="(min-width: 768px) 25vw, 50vw"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
              {media.type === 'gif' && (

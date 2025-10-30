@@ -1,12 +1,16 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { MODELS } from '../../constants';
+import { playSound } from '../../utils/sound';
+import OptimizedImage from '../../components/OptimizedImage';
 
-const FeaturedModelsSlider: React.FC = () => {
+interface FeaturedModelsSliderProps {
+  onModelClick: (modelId: number) => void;
+}
+
+const FeaturedModelsSlider: React.FC<FeaturedModelsSliderProps> = ({ onModelClick }) => {
     const sliderRef = useRef<HTMLDivElement>(null);
-    // Fix: Initialize useRef with an initial value as it expects one argument.
     const requestRef = useRef<number | undefined>(undefined);
     const isInteracting = useRef(false);
-    // Fix: Initialize useRef with an initial value as it expects one argument.
     const interactionTimeout = useRef<any>(undefined);
 
     const isDown = useRef(false);
@@ -106,9 +110,23 @@ const FeaturedModelsSlider: React.FC = () => {
                 className="flex overflow-x-auto scrollbar-hide cursor-grab"
             >
                 {extendedModels.map((model, index) => (
-                    <div key={`${model.id}-${index}`} className="flex-shrink-0 w-64 h-96 mx-4 relative rounded-lg overflow-hidden shadow-lg select-none">
-                        <img draggable="false" src={model.imageUrl} alt={model.name} className="absolute inset-0 w-full h-full object-cover pointer-events-none grayscale" loading="lazy" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    <div 
+                        key={`${model.id}-${index}`} 
+                        className="flex-shrink-0 w-64 h-96 mx-4 relative rounded-lg overflow-hidden shadow-lg select-none cursor-pointer group"
+                        onClick={() => {
+                            playSound('click');
+                            onModelClick(model.id)
+                        }}
+                        onMouseEnter={() => playSound('hover', 0.1)}
+                    >
+                        <OptimizedImage
+                            draggable="false"
+                            src={model.imageUrl}
+                            alt={model.name}
+                            className="absolute inset-0 w-full h-full object-cover pointer-events-none grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                            sizes="256px"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent group-hover:from-black/90 transition-colors duration-300"></div>
                         <div className="absolute bottom-0 left-0 p-4">
                             <h3 className="text-xl font-bold text-white tracking-wide">{model.name}</h3>
                         </div>

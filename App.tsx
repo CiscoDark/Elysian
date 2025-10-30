@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<View>('home');
   const [isTutorialActive, setIsTutorialActive] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [scrollToModelId, setScrollToModelId] = useState<number | null>(null);
 
   const startTutorial = () => {
     playSound('open');
@@ -40,10 +41,20 @@ const App: React.FC = () => {
     setTutorialStep(prev => prev - 1);
   };
 
+  const handleModelClickFromHome = (modelId: number) => {
+    setActiveView('models');
+    setScrollToModelId(modelId);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleScrollComplete = () => {
+    setScrollToModelId(null);
+  };
+
   const renderView = () => {
     switch (activeView) {
       case 'models':
-        return <Models />;
+        return <Models scrollToModelId={scrollToModelId} onScrollComplete={handleScrollComplete} />;
       case 'modelingAgencies':
         return <ModelingAgencies />;
       case 'movieAgencies':
@@ -56,7 +67,7 @@ const App: React.FC = () => {
         return <Apply setActiveView={setActiveView} />;
       case 'home':
       default:
-        return <Home setActiveView={setActiveView} startTutorial={startTutorial} />;
+        return <Home setActiveView={setActiveView} startTutorial={startTutorial} onModelClick={handleModelClickFromHome} />;
     }
   };
 

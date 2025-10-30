@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { MODELS } from '../../constants';
 import ModelCard from './ModelCard';
 import { playSound } from '../../utils/sound';
@@ -21,7 +22,12 @@ const heightRanges: { [key: string]: [number, number] } = {
     "6'2\"+": [74, 100],
 };
 
-const Models: React.FC = () => {
+interface ModelsProps {
+  scrollToModelId?: number | null;
+  onScrollComplete?: () => void;
+}
+
+const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () => {} }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [heightFilter, setHeightFilter] = useState('All');
   const [hairFilter, setHairFilter] = useState('All');
@@ -30,6 +36,24 @@ const Models: React.FC = () => {
   const hairColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.hair))], []);
   const eyeColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.eyes))], []);
   
+  useEffect(() => {
+    if (scrollToModelId) {
+      const modelElement = document.querySelector(`[data-model-id='${scrollToModelId}']`);
+      if (modelElement) {
+        setTimeout(() => { // Delay to allow render
+          modelElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          modelElement.classList.add('highlight-scroll');
+          setTimeout(() => {
+            modelElement.classList.remove('highlight-scroll');
+          }, 2500);
+          onScrollComplete();
+        }, 100);
+      } else {
+        onScrollComplete();
+      }
+    }
+  }, [scrollToModelId, onScrollComplete]);
+
   const filteredModels = useMemo(() => {
     const heightRange = heightRanges[heightFilter];
 
@@ -121,7 +145,7 @@ const Models: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {filteredModels.map(model => (
-          <ModelCard key={model.id} model={model} />
+          <ModelCard key={model.id} model={model} wrapperProps={{ 'data-model-id': model.id }} />
         ))}
       </div>
 
@@ -158,6 +182,11 @@ const Models: React.FC = () => {
             align-items: center;
             padding: 0 0.75rem;
             color: #9ca3af;
+        }
+        .highlight-scroll {
+          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 15px 3px rgba(255, 255, 255, 0.7);
+          transition: box-shadow 0.5s ease-in-out;
+          border-radius: 0.5rem; /* Match card border-radius */
         }
       `}</style>
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MusicPromotion } from '../../types';
 import { playSound } from '../../utils/sound';
+import OptimizedImage from '../../components/OptimizedImage';
 
 interface MusicPromotionCardProps {
     promo: MusicPromotion;
@@ -11,7 +12,12 @@ const MusicPromotionCard: React.FC<MusicPromotionCardProps> = ({ promo, onLearnM
     return (
         <div className="bg-brand-secondary rounded-lg overflow-hidden shadow-lg group transform hover:-translate-y-2 transition-transform duration-300 liquid-glass-hover" onMouseEnter={() => playSound('hover')}>
             <div className="relative h-56">
-                <img className="absolute h-full w-full object-cover" src={promo.imageUrl} alt={promo.title} loading="lazy" />
+                <OptimizedImage
+                    className="absolute h-full w-full object-cover"
+                    src={promo.imageUrl}
+                    alt={promo.title}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                     <span className="bg-brand-highlight text-black text-xs font-bold px-3 py-1 rounded-full">{promo.platform}</span>
