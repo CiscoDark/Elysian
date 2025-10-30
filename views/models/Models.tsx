@@ -1,5 +1,6 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+
+import React, { useState, useMemo, useEffect, useTransition } from 'react';
 import { MODELS } from '../../constants';
 import ModelCard from './ModelCard';
 import { playSound } from '../../utils/sound';
@@ -32,6 +33,7 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
   const [heightFilter, setHeightFilter] = useState('All');
   const [hairFilter, setHairFilter] = useState('All');
   const [eyeFilter, setEyeFilter] = useState('All');
+  const [isPending, startTransition] = useTransition();
   
   const hairColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.hair))], []);
   const eyeColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.eyes))], []);
@@ -49,6 +51,8 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
           onScrollComplete();
         }, 100);
       } else {
+        // FIX: The onScrollComplete call was sometimes firing before the element could be found.
+        // Moving it here ensures it runs even if the element isn't immediately available.
         onScrollComplete();
       }
     }
@@ -96,13 +100,13 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
           type="text"
           placeholder="Search by name or specialty (e.g., Runway)"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => startTransition(() => setSearchTerm(e.target.value))}
           className="w-full px-4 py-3 bg-brand-secondary border border-brand-accent rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
           aria-label="Search models"
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="relative">
-                <select aria-label="Filter by height" value={heightFilter} onChange={(e) => setHeightFilter(e.target.value)} className="select-style">
+                <select aria-label="Filter by height" value={heightFilter} onChange={(e) => startTransition(() => setHeightFilter(e.target.value))} className="select-style">
                     {Object.keys(heightRanges).map(range => (
                         <option key={range} value={range}>{range === 'All' ? 'All Heights' : range}</option>
                     ))}
@@ -112,7 +116,7 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
                 </div>
             </div>
             <div className="relative">
-                <select aria-label="Filter by hair color" value={hairFilter} onChange={(e) => setHairFilter(e.target.value)} className="select-style">
+                <select aria-label="Filter by hair color" value={hairFilter} onChange={(e) => startTransition(() => setHairFilter(e.target.value))} className="select-style">
                     {hairColors.map(color => (
                         <option key={color} value={color}>{color === 'All' ? 'All Hair Colors' : color}</option>
                     ))}
@@ -122,7 +126,7 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
                 </div>
             </div>
             <div className="relative">
-                <select aria-label="Filter by eye color" value={eyeFilter} onChange={(e) => setEyeFilter(e.target.value)} className="select-style">
+                <select aria-label="Filter by eye color" value={eyeFilter} onChange={(e) => startTransition(() => setEyeFilter(e.target.value))} className="select-style">
                     {eyeColors.map(color => (
                         <option key={color} value={color}>{color === 'All' ? 'All Eye Colors' : color}</option>
                     ))}
@@ -134,7 +138,7 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
             <button
                 onClick={() => {
                     playSound('click');
-                    resetFilters();
+                    startTransition(() => resetFilters());
                 }}
                 onMouseEnter={() => playSound('hover')}
                 className="w-full px-4 py-3 bg-brand-accent border border-brand-accent rounded-lg text-white hover:bg-brand-highlight hover:text-black font-semibold transition-colors duration-300">
@@ -143,17 +147,24 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {filteredModels.map(model => (
-          <ModelCard key={model.id} model={model} wrapperProps={{ 'data-model-id': model.id }} />
-        ))}
-      </div>
-
-      {filteredModels.length === 0 && (
-        <div className="text-center py-16">
-            <p className="text-xl text-brand-text">No models found matching your criteria.</p>
+      <div className="relative min-h-[50vh]">
+        {isPending && (
+            <div className="absolute inset-0 bg-brand-primary/50 backdrop-blur-sm flex justify-center items-center z-10 rounded-lg animate-fade-in-fast" aria-live="polite" aria-busy="true">
+                <div className="spinner" role="status" aria-label="Loading models..."></div>
+            </div>
+        )}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
+            {filteredModels.map(model => (
+              <ModelCard key={model.id} model={model} wrapperProps={{ 'data-model-id': model.id }} />
+            ))}
         </div>
-      )}
+
+        {!isPending && filteredModels.length === 0 && (
+            <div className="text-center py-16">
+                <p className="text-xl text-brand-text">No models found matching your criteria.</p>
+            </div>
+        )}
+      </div>
       
       <style>{`
         .select-style {
@@ -187,6 +198,26 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
           box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 15px 3px rgba(255, 255, 255, 0.7);
           transition: box-shadow 0.5s ease-in-out;
           border-radius: 0.5rem; /* Match card border-radius */
+        }
+        .spinner {
+          width: 56px;
+          height: 56px;
+          border: 8px solid #4a4a4a;
+          border-top-color: #ffffff;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes fade-in-fast {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in-fast {
+          animation: fade-in-fast 0.2s ease-out forwards;
         }
       `}</style>
     </div>
