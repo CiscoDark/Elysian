@@ -46,6 +46,12 @@ const App: React.FC = () => {
   const [scrollToModelId, setScrollToModelId] = useState<number | null>(null);
 
   const navigateTo = useCallback((view: View, options?: { modelId?: number }) => {
+    // Clear application submission status when navigating away to another view.
+    // This ensures if the user navigates back to 'Apply', they see the form again.
+    if (view !== 'apply') {
+        sessionStorage.removeItem('applicationSubmitted');
+    }
+
     const path = viewPathMap[view];
     if (path === undefined) return;
 

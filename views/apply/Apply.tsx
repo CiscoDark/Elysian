@@ -37,7 +37,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     const [agreed, setAgreed] = useState(false);
     const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
     const [files, setFiles] = useState<FileState>(INITIAL_FILE_STATE);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(() => sessionStorage.getItem('applicationSubmitted') === 'true');
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -56,13 +56,14 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         // Here you would typically handle form submission, e.g., send to an API.
         console.log('Form Submitted:', { formData, files });
         playSound('success', 0.4);
+        sessionStorage.setItem('applicationSubmitted', 'true');
         setIsSubmitted(true);
     };
 
     useEffect(() => {
         if (isSubmitted) {
             const timer = setTimeout(() => {
-                navigateTo('models');
+                navigateTo('home');
             }, 3000); // Redirect after 3 seconds
 
             return () => clearTimeout(timer); // Cleanup on unmount

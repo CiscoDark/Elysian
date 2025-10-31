@@ -33,10 +33,25 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
   const [heightFilter, setHeightFilter] = useState('All');
   const [hairFilter, setHairFilter] = useState('All');
   const [eyeFilter, setEyeFilter] = useState('All');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [favoritedModels, setFavoritedModels] = useState<number[]>([]);
   const [isPending, startTransition] = useTransition();
   
   const hairColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.hair))], []);
   const eyeColors = useMemo(() => ['All', ...new Set(MODELS.map(m => m.stats.eyes))], []);
+  
+  // Load favorites from localStorage on initial render
+  useEffect(() => {
+    try {
+      const storedFavorites = localStorage.getItem('favoritedModels');
+      if (storedFavorites) {
+        setFavoritedModels(JSON.parse(storedFavorites));
+      }
+    } catch (error) {
+      console.error("Failed to parse favorites from localStorage", error);
+      setFavoritedModels([]);
+    }
+  }, []);
   
   useEffect(() => {
     if (scrollToModelId) {
@@ -58,10 +73,23 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
     }
   }, [scrollToModelId, onScrollComplete]);
 
+  const handleToggleFavorite = (modelId: number) => {
+    const newFavorites = favoritedModels.includes(modelId)
+      ? favoritedModels.filter(id => id !== modelId)
+      : [...favoritedModels, modelId];
+    
+    setFavoritedModels(newFavorites);
+    localStorage.setItem('favoritedModels', JSON.stringify(newFavorites));
+  };
+
   const filteredModels = useMemo(() => {
     const heightRange = heightRanges[heightFilter];
 
-    return MODELS.filter(model => {
+    const baseModels = showFavoritesOnly 
+        ? MODELS.filter(m => favoritedModels.includes(m.id))
+        : MODELS;
+
+    return baseModels.filter(model => {
       // Search term filter
       const matchesSearchTerm = searchTerm === '' ||
         model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,13 +107,14 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
 
       return matchesSearchTerm && matchesHair && matchesEyes && matchesHeight;
     });
-  }, [searchTerm, heightFilter, hairFilter, eyeFilter]);
+  }, [searchTerm, heightFilter, hairFilter, eyeFilter, showFavoritesOnly, favoritedModels]);
 
   const resetFilters = () => {
     setSearchTerm('');
     setHeightFilter('All');
     setHairFilter('All');
     setEyeFilter('All');
+    setShowFavoritesOnly(false);
   }
 
   return (
@@ -104,7 +133,7 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
           className="w-full px-4 py-3 bg-brand-secondary border border-brand-accent rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
           aria-label="Search models"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div className="relative">
                 <select aria-label="Filter by height" value={heightFilter} onChange={(e) => startTransition(() => setHeightFilter(e.target.value))} className="select-style">
                     {Object.keys(heightRanges).map(range => (
@@ -135,14 +164,33 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                 </div>
             </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+             <button
+                onClick={() => {
+                    playSound('click');
+                    startTransition(() => setShowFavoritesOnly(prev => !prev));
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className={`w-full sm:w-auto flex-grow px-4 py-3 border rounded-lg font-semibold transition-colors duration-300 flex items-center justify-center gap-2 ${
+                    showFavoritesOnly 
+                    ? 'bg-brand-highlight text-black border-brand-highlight'
+                    : 'bg-brand-accent text-white border-brand-accent hover:bg-brand-highlight hover:text-black'
+                }`}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                </svg>
+                {showFavoritesOnly ? 'Showing Favorites' : 'Show Favorites'}
+            </button>
             <button
                 onClick={() => {
                     playSound('click');
                     startTransition(() => resetFilters());
                 }}
                 onMouseEnter={() => playSound('hover')}
-                className="w-full px-4 py-3 bg-brand-accent border border-brand-accent rounded-lg text-white hover:bg-brand-highlight hover:text-black font-semibold transition-colors duration-300">
-                Reset
+                className="w-full sm:w-auto flex-grow px-4 py-3 bg-brand-accent border border-brand-accent rounded-lg text-white hover:bg-brand-highlight hover:text-black font-semibold transition-colors duration-300">
+                Reset All Filters
             </button>
         </div>
       </div>
@@ -155,13 +203,23 @@ const Models: React.FC<ModelsProps> = ({ scrollToModelId, onScrollComplete = () 
         )}
         <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
             {filteredModels.map(model => (
-              <ModelCard key={model.id} model={model} wrapperProps={{ 'data-model-id': model.id }} />
+              <ModelCard 
+                key={model.id} 
+                model={model} 
+                wrapperProps={{ 'data-model-id': model.id }}
+                isFavorited={favoritedModels.includes(model.id)}
+                onToggleFavorite={handleToggleFavorite}
+              />
             ))}
         </div>
 
         {!isPending && filteredModels.length === 0 && (
             <div className="text-center py-16">
-                <p className="text-xl text-brand-text">No models found matching your criteria.</p>
+                 {showFavoritesOnly && favoritedModels.length === 0 ? (
+                    <p className="text-xl text-brand-text">You haven't favorited any models yet.<br/>Click the heart icon on a model to add them here.</p>
+                ) : (
+                    <p className="text-xl text-brand-text">No models found matching your criteria.</p>
+                )}
             </div>
         )}
       </div>
