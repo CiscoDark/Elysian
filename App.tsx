@@ -33,52 +33,55 @@ const viewPathMap: { [view in View]: string } = {
   apply: '/apply',
 };
 
-const getViewFromPath = (path: string): View => {
+const getViewFromHash = (hash: string): View => {
+  // if hash is "" or "#", path is "/"
+  const path = hash.length > 1 ? hash.substring(1).split('?')[0] : '/';
   return pathViewMap[path] || 'home';
 };
 
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<View>(getViewFromPath(window.location.pathname));
+  const [activeView, setActiveView] = useState<View>(getViewFromHash(window.location.hash));
   const [isTutorialActive, setIsTutorialActive] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [scrollToModelId, setScrollToModelId] = useState<number | null>(null);
 
-  const handleNavigation = useCallback(() => {
-    const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-    const modelId = params.get('scrollTo');
-
-    setActiveView(getViewFromPath(path));
-    setScrollToModelId(modelId ? Number(modelId) : null);
-  }, []);
-  
   const navigateTo = useCallback((view: View, options?: { modelId?: number }) => {
     const path = viewPathMap[view];
-    if (!path) return;
+    if (path === undefined) return;
 
-    let url = path;
+    let hash = `#${path}`;
     if (options?.modelId) {
-      url += `?scrollTo=${options.modelId}`;
+      hash += `?scrollTo=${options.modelId}`;
     }
     
-    // Prevent pushing the same state again
-    if (window.location.pathname + window.location.search === url) return;
-
-    window.history.pushState({}, '', url);
-    handleNavigation();
+    // Setting the hash will trigger the 'hashchange' event listener
+    if (window.location.hash !== hash) {
+      window.location.hash = hash;
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [handleNavigation]);
+  }, []);
 
   useEffect(() => {
-    window.addEventListener('popstate', handleNavigation);
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const pathPart = hash.split('?')[0];
+      const searchPart = hash.split('?')[1];
+      const params = new URLSearchParams(searchPart);
+      const modelId = params.get('scrollTo');
+
+      setActiveView(getViewFromHash(pathPart));
+      setScrollToModelId(modelId ? Number(modelId) : null);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
     
-    // Initial check for query params on load
-    handleNavigation();
+    // Initial check on load
+    handleHashChange();
 
     return () => {
-      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [handleNavigation]);
+  }, []);
 
 
   const startTutorial = () => {
@@ -109,10 +112,12 @@ const App: React.FC = () => {
   const handleScrollComplete = useCallback(() => {
     setScrollToModelId(null);
     // Clean the URL after the scroll is complete to allow for sharing the link
-    const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-    if (path === '/models' && params.has('scrollTo')) {
-        window.history.replaceState({}, '', path);
+    const currentHash = window.location.hash;
+    const viewPath = currentHash.split('?')[0];
+
+    if (viewPath === '#/models' && currentHash.includes('?scrollTo=')) {
+        // Use replaceState to avoid triggering hashchange and scroll to top
+        window.history.replaceState({}, '', window.location.pathname + viewPath);
     }
   }, []);
 

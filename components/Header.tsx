@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <a href="/" onClick={(e) => handleNavClick(e, 'home')} className="flex-shrink-0">
+            <a href="#/" onClick={(e) => handleNavClick(e, 'home')} className="flex-shrink-0">
                <h1 className="text-xl font-black text-white tracking-widest uppercase">Elysian</h1>
             </a>
           </div>
@@ -76,7 +76,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
                             {link.children.map(child => (
                               <a
                                 key={child.view}
-                                href={child.path}
+                                href={`#${child.path}`}
                                 onClick={(e) => {
                                   handleNavClick(e, child.view);
                                   setIsMusicDropdownOpen(false);
@@ -94,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
                   ) : (
                     <a
                       key={link.view}
-                      href={link.path}
+                      href={`#${link.path}`}
                       data-tour-id={link.view}
                       onClick={(e) => handleNavClick(e, link.view!)}
                       onMouseEnter={() => playSound('hover')}
@@ -146,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
                   {link.children.map(child => (
                     <a
                       key={child.view}
-                      href={child.path}
+                      href={`#${child.path}`}
                       onClick={(e) => {
                           handleNavClick(e, child.view);
                           setIsMenuOpen(false);
@@ -161,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, navigateTo }) => {
               ) : (
                 <a
                   key={link.view}
-                  href={link.path}
+                  href={`#${link.path}`}
                   onClick={(e) => {
                       handleNavClick(e, link.view!);
                       setIsMenuOpen(false);
