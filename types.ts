@@ -16,7 +16,7 @@ export interface Agency {
   name: string;
   logoUrl: string;
   location: string;
-  type: 'Modeling' | 'Movie';
+  type: 'Modeling' | 'Movie' | 'Music';
   specialization: string;
 }
 

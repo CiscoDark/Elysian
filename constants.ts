@@ -41,6 +41,8 @@ export const AGENCIES: Agency[] = [
   { id: 4, name: 'Uni-versal Extras', logoUrl: 'https://picsum.photos/seed/universal-logo/200/200', location: 'London, UK', type: 'Movie', specialization: 'Background & Extra Casting for Film/TV' },
   { id: 5, name: 'Calvin Klein', logoUrl: 'https://picsum.photos/seed/ck-logo/200/200', location: 'New York, USA', type: 'Modeling', specialization: 'Minimalist & Commercial' },
   { id: 6, name: 'Central Casting', logoUrl: 'https://picsum.photos/seed/central-logo/200/200', location: 'Burbank, USA', type: 'Movie', specialization: 'Background Actors for Film, TV, and Commercials' },
+  { id: 7, name: 'Acting Division (LightStorm Entertainment Ltd.)', logoUrl: 'https://picsum.photos/seed/lightstorm-logo/200/200', location: 'Santa Monica, USA', type: 'Movie', specialization: 'Prestigious Film & Television Representation' },
+  { id: 8, name: 'Music Division (Independent Talent Group Ltd.)', logoUrl: 'https://picsum.photos/seed/itg-logo/200/200', location: 'London, UK', type: 'Music', specialization: 'Global Music Artist Representation' },
 ];
 
 export const CASTING_CALLS: CastingCall[] = [
