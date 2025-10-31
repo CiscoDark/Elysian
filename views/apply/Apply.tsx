@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
 
@@ -37,7 +37,6 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     const [agreed, setAgreed] = useState(false);
     const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
     const [files, setFiles] = useState<FileState>(INITIAL_FILE_STATE);
-    const [isSubmitted, setIsSubmitted] = useState(() => sessionStorage.getItem('applicationSubmitted') === 'true');
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -56,19 +55,8 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         // Here you would typically handle form submission, e.g., send to an API.
         console.log('Form Submitted:', { formData, files });
         playSound('success', 0.4);
-        sessionStorage.setItem('applicationSubmitted', 'true');
-        setIsSubmitted(true);
+        navigateTo('models');
     };
-
-    useEffect(() => {
-        if (isSubmitted) {
-            const timer = setTimeout(() => {
-                navigateTo('home');
-            }, 3000); // Redirect after 3 seconds
-
-            return () => clearTimeout(timer); // Cleanup on unmount
-        }
-    }, [isSubmitted, navigateTo]);
     
     const renderTerms = () => (
         <div className="relative max-w-4xl mx-auto bg-brand-secondary p-8 rounded-lg shadow-xl">
@@ -223,18 +211,6 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         </div>
     );
 
-    const renderSuccess = () => (
-        <div className="relative max-w-4xl mx-auto bg-brand-secondary p-8 rounded-lg shadow-xl text-center">
-            <div className="flex justify-center items-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Application Submitted!</h2>
-            <p className="text-lg text-brand-text mb-8">Thank you. Please refer back to the person that contacted you for the next steps.</p>
-        </div>
-    );
-
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="text-center mb-12">
@@ -242,7 +218,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                 <p className="mt-4 text-lg text-brand-text">Join the next generation of talent. Start your application below.</p>
             </div>
             
-            {isSubmitted ? renderSuccess() : (step === 'terms' ? renderTerms() : renderForm())}
+            {step === 'terms' ? renderTerms() : renderForm()}
 
             <style>{`
                 .input-style {
