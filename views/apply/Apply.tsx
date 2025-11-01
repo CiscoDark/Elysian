@@ -1,9 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
-import { db, storage } from '../../firebase';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ApplyProps {
     navigateTo: (view: View) => void;
@@ -73,49 +70,51 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         setSubmissionStatus('submitting');
         setSubmissionError(null);
 
+        const submissionData = new FormData();
+
+        // Append form text data
+        // FIX: Replaced Object.entries with Object.keys for better type safety with FormData. This resolves an issue where the value was inferred as 'unknown'.
+        Object.keys(formData).forEach((key) => {
+            submissionData.append(key, formData[key as keyof FormState]);
+        });
+
+        // Append files
+        // FIX: Replaced Object.entries with Object.keys for better type safety with FormData. This resolves an issue where the file was inferred as 'unknown' or '{}'.
+        Object.keys(files).forEach((key) => {
+            const file = files[key as keyof FileState];
+            if (file) {
+                submissionData.append(key, file);
+            }
+        });
+
+        // FormSubmit.co specific fields
+        submissionData.append('_subject', `New Elysian Hub Application: ${formData.fullName}`);
+
         try {
-            // 1. Create a new document reference in Firestore to get a unique ID
-            const applicationDocRef = doc(collection(db, 'applications'));
-            const applicationId = applicationDocRef.id;
-
-            // 2. Upload files and get their download URLs
-            const uploadedFileUrls: { headshotUrl?: string; fullBodyUrl?: string; sideProfileUrl?: string; videoUrl?: string } = {};
-            const uploadTasks = Object.entries(files).map(async ([key, file]) => {
-                if (file) {
-                    const filePath = `applications/${applicationId}/${key}_${file.name}`;
-                    const storageRef = ref(storage, filePath);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(snapshot.ref);
-                    
-                    const urlKey = `${key}Url` as keyof typeof uploadedFileUrls;
-                    uploadedFileUrls[urlKey] = downloadURL;
-                }
+            const response = await fetch('https://formsubmit.co/elysianhub74@gmail.com', {
+                method: 'POST',
+                body: submissionData,
+                headers: {
+                    'Accept': 'application/json',
+                },
             });
 
-            await Promise.all(uploadTasks);
+            const result = await response.json();
 
-            // 3. Save form data and file URLs to Firestore
-            await setDoc(applicationDocRef, {
-                ...formData,
-                ...uploadedFileUrls,
-                submittedAt: new Date().toISOString(),
-                status: 'pending',
-            });
-
-            // 4. Handle success
-            playSound('success', 0.4);
-            setSubmissionStatus('success');
-            sessionStorage.setItem('applicationSubmitted', 'true');
+            if (response.ok && result.success === 'true') {
+                // Handle success
+                playSound('success', 0.4);
+                setSubmissionStatus('success');
+                sessionStorage.setItem('applicationSubmitted', 'true');
+            } else {
+                // FormSubmit.co might return a 4xx error with a JSON body
+                throw new Error(result.message || 'Sorry, there was an error submitting your application.');
+            }
 
         } catch (error) {
-            console.error("Firebase submission error: ", error);
-            // FIX: The 'error' object in a catch block is of type 'unknown'. By checking if it's an instance of Error,
-            // we can safely access its properties and resolve the "Property 'name' does not exist on type 'unknown'" error.
-            if (error instanceof Error) {
-                setSubmissionError(`There was an error submitting your application: ${error.message}. Please try again.`);
-            } else {
-                setSubmissionError("There was an error submitting your application. Please check your connection and try again.");
-            }
+            console.error("Submission error: ", error);
+            const message = error instanceof Error ? `Submission failed: ${error.message}` : "An unknown error occurred. Please try again.";
+            setSubmissionError(message);
             setSubmissionStatus('idle'); // Reset status to allow retry
         }
     };
@@ -292,7 +291,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                         )}
                     </button>
                     {submissionError && (
-                        <p className="text-red-500 text-center mt-4">{submissionError}</p>
+                        <p className="text-red-500 text-center mt-4 text-sm break-words">{submissionError}</p>
                     )}
                 </div>
             </form>
