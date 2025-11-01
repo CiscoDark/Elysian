@@ -51,12 +51,6 @@ const TOUR_CONFIG = [
     content: 'This section is dedicated to the music world, offering casting for music videos and promotional services.',
     position: 'bottom',
   },
-  {
-    targetSelector: '[data-tour-id="apply"]',
-    title: 'Join Us',
-    content: 'Are you the next big star? Click here to start your application and join the Elysian family.',
-    position: 'bottom-right',
-  },
    {
     targetSelector: 'body',
     title: 'Tour Complete!',
