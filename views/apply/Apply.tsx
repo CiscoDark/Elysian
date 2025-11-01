@@ -1,6 +1,9 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
+import { db, storage } from '../../firebase';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ApplyProps {
     navigateTo: (view: View) => void;
@@ -22,6 +25,7 @@ type FileState = {
     headshot: File | null;
     fullBody: File | null;
     sideProfile: File | null;
+    video: File | null;
 };
 
 const INITIAL_FORM_STATE: FormState = {
@@ -29,7 +33,7 @@ const INITIAL_FORM_STATE: FormState = {
 };
 
 const INITIAL_FILE_STATE: FileState = {
-    headshot: null, fullBody: null, sideProfile: null
+    headshot: null, fullBody: null, sideProfile: null, video: null
 };
 
 const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
@@ -38,6 +42,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
     const [files, setFiles] = useState<FileState>(INITIAL_FILE_STATE);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+    const [submissionError, setSubmissionError] = useState<string | null>(null);
 
     useEffect(() => {
         if (sessionStorage.getItem('applicationSubmitted') === 'true') {
@@ -57,16 +62,62 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         }
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        
+        if (!files.headshot || !files.fullBody || !files.sideProfile) {
+            setSubmissionError('Please upload all three required photos.');
+            return;
+        }
+
         setSubmissionStatus('submitting');
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Form Submitted:', { formData, files });
+        setSubmissionError(null);
+
+        try {
+            // 1. Create a new document reference in Firestore to get a unique ID
+            const applicationDocRef = doc(collection(db, 'applications'));
+            const applicationId = applicationDocRef.id;
+
+            // 2. Upload files and get their download URLs
+            const uploadedFileUrls: { headshotUrl?: string; fullBodyUrl?: string; sideProfileUrl?: string; videoUrl?: string } = {};
+            const uploadTasks = Object.entries(files).map(async ([key, file]) => {
+                if (file) {
+                    const filePath = `applications/${applicationId}/${key}_${file.name}`;
+                    const storageRef = ref(storage, filePath);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(snapshot.ref);
+                    
+                    const urlKey = `${key}Url` as keyof typeof uploadedFileUrls;
+                    uploadedFileUrls[urlKey] = downloadURL;
+                }
+            });
+
+            await Promise.all(uploadTasks);
+
+            // 3. Save form data and file URLs to Firestore
+            await setDoc(applicationDocRef, {
+                ...formData,
+                ...uploadedFileUrls,
+                submittedAt: new Date().toISOString(),
+                status: 'pending',
+            });
+
+            // 4. Handle success
             playSound('success', 0.4);
             setSubmissionStatus('success');
             sessionStorage.setItem('applicationSubmitted', 'true');
-        }, 1500);
+
+        } catch (error) {
+            console.error("Firebase submission error: ", error);
+            // FIX: The 'error' object in a catch block is of type 'unknown'. By checking if it's an instance of Error,
+            // we can safely access its properties and resolve the "Property 'name' does not exist on type 'unknown'" error.
+            if (error instanceof Error) {
+                setSubmissionError(`There was an error submitting your application: ${error.message}. Please try again.`);
+            } else {
+                setSubmissionError("There was an error submitting your application. Please check your connection and try again.");
+            }
+            setSubmissionStatus('idle'); // Reset status to allow retry
+        }
     };
     
     const renderTerms = () => (
@@ -210,6 +261,18 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                     </div>
                 </div>
 
+                {/* Optional Video Upload */}
+                <div className="mt-8 border-t border-brand-accent pt-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Upload Optional Video</h3>
+                    <p className="text-sm text-gray-400 mb-4">Showcase your personality or skills (e.g., runway walk, short monologue). This is highly recommended.</p>
+                    <div className="file-input-wrapper">
+                        <label htmlFor="video" className="file-input-label">
+                            {files.video ? files.video.name : 'Upload Video (Optional)'}
+                        </label>
+                        <input type="file" name="video" id="video" onChange={handleFileChange} className="hidden" accept="video/*" />
+                    </div>
+                </div>
+
                 <div className="mt-8">
                      <button
                         type="submit"
@@ -228,6 +291,9 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                             'Submit Application'
                         )}
                     </button>
+                    {submissionError && (
+                        <p className="text-red-500 text-center mt-4">{submissionError}</p>
+                    )}
                 </div>
             </form>
         </div>
