@@ -89,6 +89,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
 
         // FormSubmit.co specific fields
         submissionData.append('_subject', `New Elysian Hub Application: ${formData.fullName}`);
+        submissionData.append('_captcha', 'false');
 
         try {
             const response = await fetch('https://formsubmit.co/elysianhub74@gmail.com', {
@@ -101,7 +102,7 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
 
             const result = await response.json();
 
-            if (response.ok && result.success === 'true') {
+            if (response.ok && result.success) {
                 // Handle success
                 playSound('success', 0.4);
                 setSubmissionStatus('success');
