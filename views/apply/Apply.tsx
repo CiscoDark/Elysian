@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
 
@@ -37,6 +37,13 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     const [agreed, setAgreed] = useState(false);
     const [formData, setFormData] = useState<FormState>(INITIAL_FORM_STATE);
     const [files, setFiles] = useState<FileState>(INITIAL_FILE_STATE);
+    const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+    useEffect(() => {
+        if (sessionStorage.getItem('applicationSubmitted') === 'true') {
+            setSubmissionStatus('success');
+        }
+    }, []);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -52,10 +59,14 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Here you would typically handle form submission, e.g., send to an API.
-        console.log('Form Submitted:', { formData, files });
-        playSound('success', 0.4);
-        navigateTo('models');
+        setSubmissionStatus('submitting');
+        // Simulate API call
+        setTimeout(() => {
+            console.log('Form Submitted:', { formData, files });
+            playSound('success', 0.4);
+            setSubmissionStatus('success');
+            sessionStorage.setItem('applicationSubmitted', 'true');
+        }, 1500);
     };
     
     const renderTerms = () => (
@@ -202,12 +213,43 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                 <div className="mt-8">
                      <button
                         type="submit"
-                        onMouseEnter={() => playSound('hover')}
-                        className="w-full bg-brand-highlight text-black font-semibold py-3 px-6 rounded-full text-lg transition duration-300 transform hover:scale-105 shadow-lg">
-                        Submit Application
+                        disabled={submissionStatus === 'submitting'}
+                        onMouseEnter={() => submissionStatus !== 'submitting' && playSound('hover')}
+                        className="w-full bg-brand-highlight text-black font-semibold py-3 px-6 rounded-full text-lg transition duration-300 transform hover:scale-105 shadow-lg disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100 flex justify-center items-center"
+                    >
+                         {submissionStatus === 'submitting' ? (
+                            <>
+                                <div className="spinner-small" role="status">
+                                    <span className="sr-only">Submitting...</span>
+                                </div>
+                                <span className="ml-2">Submitting...</span>
+                            </>
+                        ) : (
+                            'Submit Application'
+                        )}
                     </button>
                 </div>
             </form>
+        </div>
+    );
+    
+    const renderSuccess = () => (
+        <div className="max-w-4xl mx-auto bg-brand-secondary p-8 md:p-12 rounded-lg shadow-xl text-center animate-fade-in">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-green-400 mx-auto mb-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <h2 className="text-3xl font-bold text-white mb-4">Application Submitted!</h2>
+            <p className="text-brand-text mb-8">Thank you for your interest in Elysian Talent Hub. Our team will review your application and contact you if you are a potential fit.</p>
+            <button
+                onClick={() => {
+                    playSound('click');
+                    navigateTo('home');
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className="font-semibold py-3 px-8 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover"
+            >
+                Back to Home
+            </button>
         </div>
     );
 
@@ -218,7 +260,13 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                 <p className="mt-4 text-lg text-brand-text">Join the next generation of talent. Start your application below.</p>
             </div>
             
-            {step === 'terms' ? renderTerms() : renderForm()}
+            {submissionStatus === 'success' ? (
+                renderSuccess()
+            ) : step === 'terms' ? (
+                renderTerms()
+            ) : (
+                renderForm()
+            )}
 
             <style>{`
                 .input-style {
@@ -253,6 +301,24 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                 .file-input-label:hover {
                     border-color: #FFFFFF;
                     color: #FFFFFF;
+                }
+                .spinner-small {
+                  width: 20px;
+                  height: 20px;
+                  border: 3px solid rgba(0, 0, 0, 0.2);
+                  border-top-color: #000;
+                  border-radius: 50%;
+                  animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                  to { transform: rotate(360deg); }
+                }
+                @keyframes fade-in {
+                  from { opacity: 0; transform: translateY(10px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                  animation: fade-in 0.5s ease-out forwards;
                 }
             `}</style>
         </div>
