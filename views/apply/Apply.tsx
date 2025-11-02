@@ -2,6 +2,9 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import type { View } from '../../types';
 import { playSound } from '../../utils/sound';
 
+// Add type declaration for JSZip loaded from CDN
+declare const JSZip: any;
+
 interface ApplyProps {
     navigateTo: (view: View) => void;
 }
@@ -44,6 +47,11 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
     useEffect(() => {
         if (sessionStorage.getItem('applicationSubmitted') === 'true') {
             setSubmissionStatus('success');
+            // Try to load form data from session storage to populate success message if page is reloaded
+            const savedData = sessionStorage.getItem('applicationFormData');
+            if (savedData) {
+                setFormData(JSON.parse(savedData));
+            }
         }
     }, []);
 
@@ -70,51 +78,46 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
         setSubmissionStatus('submitting');
         setSubmissionError(null);
 
-        const submissionData = new FormData();
-
-        // Append form text data
-        // FIX: Replaced Object.entries with Object.keys for better type safety with FormData. This resolves an issue where the value was inferred as 'unknown'.
-        Object.keys(formData).forEach((key) => {
-            submissionData.append(key, formData[key as keyof FormState]);
-        });
-
-        // Append files
-        // FIX: Replaced Object.entries with Object.keys for better type safety with FormData. This resolves an issue where the file was inferred as 'unknown' or '{}'.
-        Object.keys(files).forEach((key) => {
-            const file = files[key as keyof FileState];
-            if (file) {
-                submissionData.append(key, file);
-            }
-        });
-
-        // FormSubmit.co specific fields
-        submissionData.append('_subject', `New Elysian Hub Application: ${formData.fullName}`);
-        submissionData.append('_captcha', 'false');
-
         try {
-            const response = await fetch('https://formsubmit.co/elysianhub74@gmail.com', {
-                method: 'POST',
-                body: submissionData,
-                headers: {
-                    'Accept': 'application/json',
-                },
+            const zip = new JSZip();
+
+            // Create a details text file
+            let detailsContent = `Elysian Talent Hub Application\n`;
+            detailsContent += `=============================\n\n`;
+            Object.keys(formData).forEach(key => {
+                const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                detailsContent += `${formattedKey}: ${formData[key as keyof FormState]}\n`;
             });
+            zip.file("application_details.txt", detailsContent);
 
-            const result = await response.json();
+            // Add all uploaded files to the zip
+            Object.keys(files).forEach(key => {
+                const file = files[key as keyof FileState];
+                if (file) {
+                    zip.file(file.name, file);
+                }
+            });
+            
+            // Generate and trigger download
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            const fileName = `application_${formData.fullName.replace(/\s/g, '_') || 'talent'}.zip`;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
 
-            if (response.ok && result.success) {
-                // Handle success
-                playSound('success', 0.4);
-                setSubmissionStatus('success');
-                sessionStorage.setItem('applicationSubmitted', 'true');
-            } else {
-                // FormSubmit.co might return a 4xx error with a JSON body
-                throw new Error(result.message || 'Sorry, there was an error submitting your application.');
-            }
+            // Update UI to success state
+            playSound('success', 0.4);
+            setSubmissionStatus('success');
+            sessionStorage.setItem('applicationSubmitted', 'true');
+            sessionStorage.setItem('applicationFormData', JSON.stringify(formData));
 
         } catch (error) {
-            console.error("Submission error: ", error);
-            const message = error instanceof Error ? `Submission failed: ${error.message}` : "An unknown error occurred. Please try again.";
+            console.error("File generation error: ", error);
+            const message = error instanceof Error ? `Failed to generate application file: ${error.message}` : "An unknown error occurred. Please try again.";
             setSubmissionError(message);
             setSubmissionStatus('idle'); // Reset status to allow retry
         }
@@ -283,12 +286,12 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
                          {submissionStatus === 'submitting' ? (
                             <>
                                 <div className="spinner-small" role="status">
-                                    <span className="sr-only">Submitting...</span>
+                                    <span className="sr-only">Packaging...</span>
                                 </div>
-                                <span className="ml-2">Submitting...</span>
+                                <span className="ml-2">Packaging Application...</span>
                             </>
                         ) : (
-                            'Submit Application'
+                            'Generate & Download Application File'
                         )}
                     </button>
                     {submissionError && (
@@ -304,18 +307,40 @@ const Apply: React.FC<ApplyProps> = ({ navigateTo }) => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-green-400 mx-auto mb-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <h2 className="text-3xl font-bold text-white mb-4">Application Submitted!</h2>
-            <p className="text-brand-text mb-8">Thank you for your interest in Elysian Talent Hub. Our team will review your application and contact you if you are a potential fit.</p>
-            <button
-                onClick={() => {
-                    playSound('click');
-                    navigateTo('home');
-                }}
+            <h2 className="text-3xl font-bold text-white mb-4">Your Application File is Ready!</h2>
+            <p className="text-brand-text mb-6">
+                We've successfully packaged your application into a ZIP file named{' '}
+                <strong>application_{formData.fullName.replace(/\s/g, '_') || 'talent'}.zip</strong>, which should have started downloading.
+            </p>
+            
+            <div className="bg-brand-primary border border-brand-accent p-6 rounded-lg text-left mb-8 space-y-4">
+                <h3 className="font-bold text-white text-lg">Final Step: Email Your Application File</h3>
+                <p className="text-brand-text">
+                    Please send the downloaded <code>.zip</code> file as an attachment to our casting team.
+                </p>
+                <div className="bg-brand-accent p-4 rounded-md">
+                    <p className="text-sm text-gray-400">Recipient Email:</p>
+                    <p className="font-mono text-lg text-brand-highlight break-all">elysianhub74@gmail.com</p>
+                </div>
+                <div>
+                    <h4 className="font-semibold text-white mb-2">Instructions:</h4>
+                    <ol className="list-decimal list-inside text-brand-text space-y-2">
+                        <li>Find the file named <strong>application_{formData.fullName.replace(/\s/g, '_') || 'talent'}.zip</strong> in your downloads.</li>
+                        <li>Click the button below to open your email client. The recipient and subject will be pre-filled.</li>
+                        <li><strong>IMPORTANT:</strong> Attach the downloaded <code>.zip</code> file to the email.</li>
+                        <li>Send the email. Our team will review it and get back to you.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <a
+                href={`mailto:elysianhub74@gmail.com?subject=Elysian Hub Application: ${encodeURIComponent(formData.fullName)}&body=${encodeURIComponent('Please find my application file attached.\n\nThank you,\n' + formData.fullName)}`}
+                onClick={() => playSound('click')}
                 onMouseEnter={() => playSound('hover')}
-                className="font-semibold py-3 px-8 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover"
+                className="font-semibold py-3 px-8 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover inline-block"
             >
-                Back to Home
-            </button>
+                Open Email Client & Attach File
+            </a>
         </div>
     );
 
