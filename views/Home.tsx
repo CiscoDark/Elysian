@@ -90,13 +90,23 @@ const Home: React.FC<HomeProps> = ({ navigateTo, startTutorial, onModelClick }) 
             <p className="mt-6 max-w-2xl mx-auto text-lg text-brand-text animate-fade-in-up">
               The premier digital nexus where creativity, talent, and opportunity converge.
             </p>
-            <div className="mt-10 animate-fade-in-up">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up">
               <button
                 onClick={startTutorial}
                 onMouseEnter={() => playSound('hover')}
-                className="font-semibold py-4 px-10 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover"
+                className="font-semibold py-4 px-10 rounded-full text-lg text-brand-highlight transition duration-300 transform hover:scale-105 shadow-lg liquid-glass-hover w-full sm:w-auto"
               >
                 Explore the Hub
+              </button>
+              <button
+                onClick={() => {
+                    playSound('click');
+                    navigateTo('apply');
+                }}
+                onMouseEnter={() => playSound('hover')}
+                className="font-semibold py-4 px-10 rounded-full text-lg bg-brand-highlight text-black transition duration-300 transform hover:scale-105 shadow-lg w-full sm:w-auto"
+              >
+                Apply Now
               </button>
             </div>
           </div>
