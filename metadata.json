@@ -1,5 +1,6 @@
 {
   "name": "Elysian Talent Hub",
-  "description": "A premier digital platform connecting modeling agencies, models, movie casting directors, and movie agencies. Discover top talent, find casting calls, and manage your agency's portfolio in one seamless experience.",
-  "requestFramePermissions": []
+  "description": "A premier talent and agency platform featuring Apple Liquid Glass aesthetic, interactive casting calls, model showcases, and direct representation applications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

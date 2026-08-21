@@ -1,101 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
+<!-- Elysian Talent Hub — built by Cisco Dark (Jolayemi) — hazelyak -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Elysian Talent Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#000000',
-              'brand-secondary': '#111111',
-              'brand-accent': '#222222',
-              'brand-highlight': '#FFFFFF',
-              'brand-text': '#FAFAFA',
-            },
-            fontFamily: {
-              sans: ['Poppins', 'sans-serif'],
-            },
-          },
-        },
-      }
-    </script>
-    <style>
-      .liquid-glass-hover {
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          transition: background-color 0.3s ease, border-color 0.3s ease;
-      }
-      .liquid-glass-hover:hover {
-          background-color: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.25);
-      }
-      .active-nav-link {
-        background: rgba(255, 255, 255, 0.2) !important;
-      }
-
-      /* Custom Auto-Hiding Scrollbar */
-      :root {
-        --scrollbar-thumb-bg: rgba(255, 255, 255, 0);
-        --scrollbar-thumb-bg-hover: rgba(255, 255, 255, 0.5);
-        --scrollbar-track-bg: transparent;
-      }
-
-      body:hover {
-        --scrollbar-thumb-bg: rgba(255, 255, 255, 0.3);
-      }
-      
-      /* For Webkit browsers */
-      ::-webkit-scrollbar {
-        width: 14px;
-      }
-      
-      ::-webkit-scrollbar-track {
-        background: var(--scrollbar-track-bg);
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: var(--scrollbar-thumb-bg);
-        border-radius: 20px;
-        border: 4px solid transparent;
-        background-clip: content-box;
-        transition: background-color 0.3s ease-in-out;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: var(--scrollbar-thumb-bg-hover);
-      }
-
-      /* For Firefox - A minimal scrollbar as a fallback */
-      @supports (scrollbar-color: auto) {
-        html {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-        }
-      }
-    </style>
+    <meta name="description" content="Premier digital platform connecting modeling agencies, models, casting directors, and music creatives with Apple Liquid Glass aesthetic." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
-</head>
-  <body class="bg-brand-primary text-brand-text">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#050507] text-[#FAFAFA] antialiased selection:bg-white/20 selection:text-white overflow-x-hidden min-h-screen">
     <div id="root"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+
